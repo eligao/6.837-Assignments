@@ -2,6 +2,8 @@
 #include "image.h"
 ifs::ifs()
 {
+	pMatrix = NULL;
+	pfMatrix = NULL;
 }
 
 ifs::ifs(const std::string & inputFileName)
@@ -13,8 +15,8 @@ ifs::ifs(const std::string & inputFileName)
 
 ifs::~ifs()
 {
-	delete this->pMatrix;
-	delete this->pfMatrix;
+// 	delete this->pMatrix;
+// 	delete this->pfMatrix;
 }
 
 int ifs::read(const char * input_file)
@@ -111,16 +113,37 @@ int ifs::render(const char * outputFileName, int nPoint, int nIteration, int siz
 // 		display a dot at(xk, yk)
 	Image img(size,size);
 	
-	img.SetAllPixels(Vec3f(0, 0, 0));
+	img.SetAllPixels(Vec3f(1, 1, 1));
 
 	for (int i = 0; i < nPoint;i++)
 	{
-		Vec2f v2f(randf(),randf());//a random dot.
+		Vec2f point(randf(),randf());//a random dot.
 		for (int k = 0; k < nIteration; k++)
 		{
-			rand_transform()->Transform(v2f);
+			const Matrix * matrix = rand_transform();
+			matrix->Transform(point);
+			bool isUnreasonable = false;
+			if (point.y() < 0) {
+				point.Set(point.x(), 0);
+				isUnreasonable = true;
+			}
+			else if (point.y() >= 1) {
+				point.Set(point.x(), 0.9999999);
+				isUnreasonable = true;
+			}
+			if (point.x() < 0) {
+				point.Set(0, point.y());
+				isUnreasonable = true;
+			}
+			else if (point.x() >= 1) {
+				point.Set(0.9999999, point.y());
+				isUnreasonable = true;
+			}
+			if (isUnreasonable) {
+				break;
+			}
 		}
-		img.SetPixel((int)v2f.x()*size, (int)v2f.y()*size, Vec3f(1, 1, 1));
+		img.SetPixel(point.x()*size, point.y()*size, Vec3f(0, 0, 0));
 	}
 	img.SaveTGA(outputFileName);
 	return 0;
@@ -135,11 +158,13 @@ const Matrix * ifs::rand_transform() const
 	{
 		if (r < p + pfMatrix[matrix_index]) 
 			break;
+		p += pfMatrix[matrix_index];
 	}
 	return pMatrix+matrix_index;
 }
 
 float ifs::randf(float LO, float HI) const
 {
-	return LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+	float f=LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+	return f;
 }

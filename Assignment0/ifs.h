@@ -29,7 +29,7 @@ private:
 	//  pick a random transform
 	const Matrix * rand_transform() const;
 	//generate float between min and max
-	float randf(float LO = 0.0f, float HI = 0.0f) const;
+	float randf(float LO = 0.0f, float HI = 1.0f) const;
 // 	//  transforming 
 // 	Vec2f& transform(Vec2f* vec);
 };
