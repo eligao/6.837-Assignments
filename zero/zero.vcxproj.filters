@@ -74,5 +74,8 @@
     <ClInclude Include="include\vecmath\Vector4f.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

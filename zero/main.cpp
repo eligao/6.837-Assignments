@@ -4,7 +4,11 @@
 #include <sstream>
 #include <vector>
 #include "vecmath.h"
+#include "util.h"
 using namespace std;
+
+// Macros
+#define MAX_BUFFER_SIZE 256
 
 // Globals
 
@@ -27,7 +31,7 @@ int iColor = 0;
 GLdouble eyex = 0.0, eyey = 0.0, eyez = 5.0,
 centerx = 0.0, centery = 0.0, centerz = 0.0,
 upx = 0.0, upy = 1.0, upz = 0.0;
-//the light0 coord
+//the light0 coord 
 GLfloat lightx=1.0,lighty=1.0,lightz=5.0;
 
 
@@ -96,7 +100,6 @@ void specialFunc( int key, int x, int y )
 // This function is responsible for displaying the object.
 void drawScene(void)
 {
-    int i;
 
     // Clear the rendering window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -143,7 +146,23 @@ void drawScene(void)
 
 	// This GLUT method draws a teapot.  You should replace
 	// it with code which draws the object you loaded.
-	glutSolidTeapot(1.0);
+// 	glutSolidTeapot(1.0);
+	for (vector<unsigned> face : vecf)
+	{
+		const unsigned
+			&a = face[0], &b = face[1], &c = face[2],
+			&d = face[3], &e = face[4], &f = face[5],
+			&g = face[6], &h = face[7], &i = face[8];
+		glBegin(GL_TRIANGLES);
+		glNormal3d(vecn[c - 1][0], vecn[c - 1][1], vecn[c - 1][2]);
+		glVertex3d(vecv[a - 1][0], vecv[a - 1][1], vecv[a - 1][2]);
+		glNormal3d(vecn[f - 1][0], vecn[f - 1][1], vecn[f - 1][2]);
+		glVertex3d(vecv[d - 1][0], vecv[d - 1][1], vecv[d - 1][2]);
+		glNormal3d(vecn[i - 1][0], vecn[i - 1][1], vecn[i - 1][2]);
+		glVertex3d(vecv[g - 1][0], vecv[g - 1][1], vecv[g - 1][2]);
+		glEnd();
+	}
+
     
     // Dump the image to the screen.
     glutSwapBuffers();
@@ -180,6 +199,62 @@ void reshapeFunc(int w, int h)
 void loadInput()
 {
 	// load the OBJ file here
+// 	vecf;
+// 	vecn;
+// 	vecv;
+	char buffer[MAX_BUFFER_SIZE];
+	while (cin.getline(buffer, MAX_BUFFER_SIZE))
+	{
+		if (buffer[0]=='#')//skip commentary lines.
+		{
+			continue;
+		}
+		stringstream ss(buffer);
+		string entry_type;
+		ss >> entry_type;
+
+		if (entry_type=="v")//vector
+		{
+			//v -0.523721 0.453991 -0.720840
+			Vector3f v3;
+			ss >> v3.x() >> v3.y() >> v3.z();
+			vecv.push_back(v3);
+		}
+		else if (entry_type=="vn")//vector normal
+		{
+			//vn 0.309017 0.000000 -0.951057
+			Vector3f v3;
+			ss >> v3.x() >> v3.y() >> v3.z();
+			vecn.push_back(v3);
+		}
+		else if (entry_type=="f")//face
+		{
+			//f 191/200/191 190/199/190 171/179/171
+			vector<unsigned> face_index;
+			string slashed_data;
+			while (ss>>slashed_data)//in forms of "191/200/191"
+			{
+				vector<string> parts;
+				split(slashed_data, parts, "/");//split into 191 200 191
+				int i=0;
+				for (string part :parts)//load parts into vector
+				{
+					face_index.push_back(atoi((part.c_str())));
+					i++;
+				}
+				while (i<2)//fill in the trailing data in case of omit
+				{
+					face_index.push_back(0);
+					i++;
+				}
+			}
+			vecf.push_back(face_index);
+		}
+		else//omit other types
+		{
+			continue;
+		}
+	}
 }
 
 // Main routine.

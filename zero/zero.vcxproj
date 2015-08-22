@@ -97,6 +97,7 @@
     <ClInclude Include="include\vecmath\Vector2f.h" />
     <ClInclude Include="include\vecmath\Vector3f.h" />
     <ClInclude Include="include\vecmath\Vector4f.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
