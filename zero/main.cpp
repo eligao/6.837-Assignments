@@ -9,7 +9,7 @@ using namespace std;
 
 // Macros
 #define MAX_BUFFER_SIZE 256
-
+#define PI 3.141592653
 // Globals
 
 // This is the list of points (3D vectors)
@@ -34,6 +34,8 @@ upx = 0.0, upy = 1.0, upz = 0.0;
 //the light0 coord 
 GLfloat lightx=1.0,lighty=1.0,lightz=5.0;
 
+bool bRotating = false;
+
 
 // These are convenience functions which allow us to call OpenGL 
 // methods on Vec3d objects
@@ -43,6 +45,28 @@ inline void glVertex(const Vector3f &a)
 inline void glNormal(const Vector3f &a) 
 { glNormal3fv(a); }
 
+
+// Spin the model
+void spinModel(int id)
+{
+	//spin interval in ms
+	static unsigned int interval_ms = 20;
+	//spin 
+	static float theta_rad = 5 * PI / 180;
+	//
+	const static float sin_theta = sin(theta_rad), cos_theta = cos(theta_rad);
+	if (!bRotating)
+		return;
+
+	for (Vector3f &v : vecv)
+	{
+		float px=v.x(), pz=v.z();
+		v.x() = px*cos_theta - pz*sin_theta;
+		v.z() = px*sin_theta + pz*cos_theta;
+	}
+	glutPostRedisplay();
+	glutTimerFunc(interval_ms, spinModel, 1);
+}
 
 // This function is called whenever a "Normal" key press is received.
 void keyboardFunc( unsigned char key, int x, int y )
@@ -57,6 +81,10 @@ void keyboardFunc( unsigned char key, int x, int y )
 		iColor = (iColor + 1) % 4;
 		cout << "Key C pressed, color changed to index " << iColor << "." << endl; 
         break;
+	case 'r':
+		bRotating = !bRotating;
+		spinModel(1);
+		break;
     default:
         cout << "Unhandled key press " << key << "." << endl;        
     }
